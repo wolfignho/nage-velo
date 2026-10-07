@@ -22,13 +22,14 @@ const fmtDateL = s => JOURS[wd(s)] + " " + fmtDate(s);
 
 /* ---------- État ---------- */
 function defaults() {
-  return { v: 1, settings: { theme: "auto", age: 27, fcmax: null, weeklyGoal: 4, planStart: monday(today()), sound: true, vibrate: true },
+  return { v: 2, settings: { theme: "auto", age: 27, fcmax: null, weeklyGoal: 3, planStart: monday(today()), sound: true, vibrate: true },
     logs: [], tests: [], milestones: {}, active: null, seenBadges: [] };
 }
 let S;
 function load() {
   try { S = Object.assign(defaults(), JSON.parse(localStorage.getItem(KEY) || "{}")); S.settings = Object.assign(defaults().settings, S.settings || {}); }
   catch (e) { S = defaults(); }
+  if (!S.v || S.v < 2) { if (+S.settings.weeklyGoal === 4) S.settings.weeklyGoal = 3; S.v = 2; save(); } // v2 : plan autour du foot (3 séances + 1 option)
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast("Impossible d'enregistrer (stockage plein ?)"); } }
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -54,6 +55,11 @@ const fmtDist = l => l.type === "natation" ? (l.distance ? Math.round(l.distance
 
 function planWeekOf(dateStr) { const d = daysBetween(S.settings.planStart, dateStr); return d < 0 ? 0 : Math.floor(d / 7) + 1; }
 function planKeyDone(k) { return S.logs.some(l => l.planKey === k); }
+const isOpt = i => OPTIONAL_SLOTS.includes(i);
+const SLOT_DAY = ["Lundi", "Mercredi", "Vendredi", "Samedi"];
+function slotLabel(P, i) { const s = SBY[P.s[i]]; return s && s.test ? SLOT_DAY[i] + " · test" : SLOT_LABEL[i]; }
+const PLAN_REQ_TOTAL = PLAN.length * REQUIRED_SLOTS.length;
+function planReqDone() { return PLAN.reduce((a, w) => a + REQUIRED_SLOTS.filter(i => planKeyDone("w" + w.w + "-" + i)).length, 0); }
 function planSlotDate(w, slot) { return addDays(S.settings.planStart, (w - 1) * 7 + SLOT_DAYS[slot]); }
 
 function logXP(l) { return 20 + Math.min(+l.duree || 0, 90) + (l.planKey ? 15 : 0) + ((+l.rpe || 0) >= 7 ? 10 : 0); }
@@ -64,7 +70,7 @@ function weekStats(mon) {
   return r;
 }
 function streakWeeks() {
-  const g = +S.settings.weeklyGoal || 4; let m = monday(today()), n = 0;
+  const g = +S.settings.weeklyGoal || 3; let m = monday(today()), n = 0;
   if (weekStats(m).n >= g) n++;
   m = addDays(m, -7);
   while (weekStats(m).n >= g) { n++; m = addDays(m, -7); if (n > 200) break; }
@@ -72,7 +78,7 @@ function streakWeeks() {
 }
 function bestStreak() {
   if (!S.logs.length) return 0;
-  const g = +S.settings.weeklyGoal || 4, first = monday(S.logs.map(l => l.date).sort()[0]);
+  const g = +S.settings.weeklyGoal || 3, first = monday(S.logs.map(l => l.date).sort()[0]);
   let m = first, cur = 0, best = 0; const end = monday(today());
   while (m <= end) { if (weekStats(m).n >= g) { cur++; best = Math.max(best, cur); } else cur = 0; m = addDays(m, 7); }
   return best;
@@ -83,9 +89,9 @@ function bestTest(k) { const ts = testsOf(k); if (!ts.length) return null; retur
 function badgeList() {
   const L = S.logs, sw = L.filter(l => l.type === "natation"), bk = L.filter(l => l.type === "velo");
   const swimM = sw.reduce((a, l) => a + (+l.distance || 0), 0), bikeKm = bk.reduce((a, l) => a + (+l.distance || 0), 0), mins = L.reduce((a, l) => a + (+l.duree || 0), 0);
-  const g = +S.settings.weeklyGoal || 4, mons = [...new Set(L.map(l => monday(l.date)))];
+  const g = +S.settings.weeklyGoal || 3, mons = [...new Set(L.map(l => monday(l.date)))];
   const improved = ["swim12", "swim100", "bike20"].some(k => { const t = testsOf(k); if (t.length < 2) return false; return TESTS[k].mieux === "haut" ? bestTest(k) > t[0].value : bestTest(k) < t[0].value; });
-  const ms = Object.keys(S.milestones).length, planDone = PLAN.reduce((a, w) => a + w.s.filter((_, i) => planKeyDone("w" + w.w + "-" + i)).length, 0);
+  const ms = Object.keys(S.milestones).length, planDone = planReqDone();
   return [
     ["first", "🎯", "Première séance", L.length >= 1], ["swim1", "🏊", "Premier plongeon", sw.length >= 1], ["bike1", "🚴", "Premier coup de pédale", bk.length >= 1],
     ["s10", "🔟", "10 séances", L.length >= 10], ["s25", "💪", "25 séances", L.length >= 25], ["s50", "🏆", "50 séances", L.length >= 50],
@@ -95,7 +101,7 @@ function badgeList() {
     ["test1", "⏱️", "Premier test", S.tests.length >= 1], ["prog", "📈", "Progrès mesuré", improved],
     ["sub2", "⚡", "100 m sous 2:00", (bestTest("swim100") || 999) < 120], ["c500", "🎖️", "500 m en 12 min", (bestTest("swim12") || 0) >= 500],
     ["vo2", "🫁", "4 × 4 min bouclé", L.some(l => l.sessionId === "V6")], ["ms8", "🧠", "8 jalons techniques", ms >= 8],
-    ["msall", "🥇", "Tous les jalons", ms >= MILESTONES.length], ["half", "🌗", "Moitié du plan", planDone >= 24], ["plan", "👑", "Plan 12 semaines terminé", planDone >= 48]
+    ["msall", "🥇", "Tous les jalons", ms >= MILESTONES.length], ["half", "🌗", "Moitié du plan", planDone >= PLAN_REQ_TOTAL / 2], ["plan", "👑", "Plan 12 semaines terminé", planDone >= PLAN_REQ_TOTAL]
   ].map(([id, e, n, ok]) => ({ id, e, n, ok }));
 }
 function totalXP() {
@@ -137,7 +143,7 @@ function render() {
 function sessCard(s, extra = {}) {
   const swim = s.type === "natation", d = sessDist(s);
   const meta = [swim ? d + " m" : "", "≈ " + sessMin(s) + " min", "RPE " + sessRpe(s) + "/10"].filter(Boolean).join(" · ");
-  return `<button class="sess ${extra.done ? "done" : ""}" data-act="sess" data-id="${s.id}" ${extra.pk ? `data-pk="${extra.pk}"` : ""}>
+  return `<button class="sess ${extra.done ? "done" : ""} ${extra.opt ? "opt" : ""}" data-act="sess" data-id="${s.id}" ${extra.pk ? `data-pk="${extra.pk}"` : ""}>
     <div class="ic ${typeCl(s.type)}">${s.test ? "⏱️" : typeIc(s.type)}</div>
     <div class="bd"><div class="t">${extra.label ? `<span class="mut small">${esc(extra.label)} · </span>` : ""}${esc(s.titre)}</div><div class="m">${meta}</div>
     <div class="m">${esc(s.focus)}${extra.date ? " · " + extra.date : ""}</div></div></button>`;
@@ -145,20 +151,26 @@ function sessCard(s, extra = {}) {
 
 /* ---------- Accueil ---------- */
 function vHome() {
-  const t = today(), w = planWeekOf(t), li = levelInfo(), ws = weekStats(monday(t)), g = +S.settings.weeklyGoal || 4;
+  const t = today(), w = planWeekOf(t), li = levelInfo(), ws = weekStats(monday(t)), g = +S.settings.weeklyGoal || 3;
   let planHtml = "";
   if (w === 0) planHtml = `<div class="card"><h3>Votre plan commence ${fmtDateL(S.settings.planStart)}</h3><p class="mut">En attendant, faites une séance libre depuis l'onglet Séances.</p></div>`;
   else if (w > 12) planHtml = `<div class="card hl"><h3>🎉 Plan de 12 semaines terminé</h3><p class="mut">Comparez vos tests dans Suivi, puis relancez un nouveau cycle depuis l'onglet Plan.</p></div>`;
   else {
-    const P = PLAN[w - 1], slots = P.s.map((id, i) => ({ id, i, k: "w" + w + "-" + i, date: planSlotDate(w, i) }));
+    const P = PLAN[w - 1], slots = P.s.map((id, i) => ({ id, i, k: "w" + w + "-" + i, date: planSlotDate(w, i), opt: isOpt(i) }));
+    const req = slots.filter(x => !x.opt), dow = wd(t);
     const todays = slots.find(x => x.date === t && !planKeyDone(x.k));
-    const next = todays || slots.find(x => !planKeyDone(x.k) && x.date >= t) || slots.find(x => !planKeyDone(x.k));
-    planHtml = `<div class="card ${todays ? "hl" : ""}"><div class="row sp"><span class="tag">Semaine ${w}/12 · ${P.phase}</span>${P.test ? '<span class="tag test">Semaine de tests</span>' : ""}</div>
-      <h3 style="margin-top:10px">${todays ? "Séance du jour" : next ? (next.date < t ? "Séance à rattraper" : "Prochaine séance") : "Semaine bouclée 💪"}</h3>
-      ${next ? sessCard(SBY[next.id], { pk: next.k, label: SLOT_LABEL[next.i], date: fmtDateL(next.date) }) +
-        `<button class="btn pri block pl-big" data-act="start" data-id="${next.id}" data-pk="${next.k}">▶ Démarrer la séance</button>` : `<p class="mut">Les 4 séances du plan sont faites. Repos, ou une récupération active si vous en avez envie.</p>`}
-      <p class="mut small" style="margin-top:10px">${esc(P.note)}</p></div>`;
-    if (wd(t) === 6) planHtml += `<div class="card"><b>⚽ Jour de match.</b> <span class="mut">Bon match ! Demain, vélo tranquille pour récupérer.</span></div>`;
+    const late = dow >= 5 ? null : req.find(x => !planKeyDone(x.k)); // pas de rattrapage la veille ou le jour du match
+    const next = todays || req.find(x => !planKeyDone(x.k) && x.date >= t) || late;
+    const nReq = req.filter(x => planKeyDone(x.k)).length;
+    const title = todays ? (todays.opt ? "Option du jour (facultative)" : "Séance du jour") : next ? (next.date < t ? "Séance à rattraper" : "Prochaine séance") : nReq === req.length ? "Semaine bouclée 💪" : "Place au match ⚽";
+    if (dow === 1 || dow === 3) planHtml += `<div class="card foot"><b>⚽ Entraînement de foot ${dow === 1 ? "ce mardi" : "ce jeudi"}.</b> <span class="mut">Pas de séance prévue dans l'application.${dow === 3 ? " Cours de natation aujourd'hui ? C'est un bonus : restez en technique et notez-le en séance libre." : ""}</span>
+      ${P.alt ? `<p class="small" style="margin:8px 0 4px">Entraînement annulé ? Remplacez-le par :</p>${sessCard(SBY[P.alt], { label: "Remplacement" })}` : ""}</div>`;
+    if (dow === 6) planHtml += `<div class="card foot"><b>⚽ Jour de match.</b> <span class="mut">Bon match ! Demain, vélo tranquille pour récupérer.</span></div>`;
+    planHtml += `<div class="card ${todays ? "hl" : ""}"><div class="row sp"><span class="tag">Semaine ${w}/12 · ${P.phase}</span>${P.test ? '<span class="tag test">Semaine de tests</span>' : ""}</div>
+      <h3 style="margin-top:10px">${title}</h3>
+      ${next ? sessCard(SBY[next.id], { pk: next.k, label: slotLabel(P, next.i), date: fmtDateL(next.date) }) +
+        `<button class="btn pri block pl-big" data-act="start" data-id="${next.id}" data-pk="${next.k}">▶ Démarrer la séance</button>` : nReq === req.length ? `<p class="mut">Les ${req.length} séances de la semaine sont faites. Le samedi : repos ou activation légère, puis le match.</p>` : `<p class="mut">Les séances manquées ne se rattrapent pas la veille ni le jour du match : on repart lundi avec la nouvelle semaine.</p>`}
+      <p class="mut small" style="margin-top:10px">${nReq}/${req.length} séances faites cette semaine · ${esc(P.note)}</p></div>`;
   }
   const last = S.logs.slice().sort((a, b) => a.date < b.date ? 1 : -1)[0];
   return `<h1>Bonjour Herve 👋</h1>
@@ -176,29 +188,32 @@ function vHome() {
 /* ---------- Plan ---------- */
 function vPlan() {
   const t = today(), cw = planWeekOf(t);
-  let h = `<h1>Plan cardio 12 semaines</h1><p class="mut">2 séances de natation + 2 de vélo par semaine, autour du foot. Tests en semaines 1, 4, 8 et 12.</p>
+  let h = `<h1>Plan cardio 12 semaines</h1><p class="mut">Construit autour du foot : entraînements mardi et jeudi, match dimanche. 3 séances par semaine (lundi, mercredi, vendredi) + 1 option légère le samedi. Tests en semaines 1, 4, 8 et 12.</p>
     <div class="card"><label class="f" for="pStart">Début du plan (un lundi)</label><div class="row"><input class="in" type="date" id="pStart" value="${S.settings.planStart}"><button class="btn sm" data-act="setstart">OK</button></div></div>
     <h2>Semaine type</h2><div class="card">${WEEK_TEMPLATE.map(d => `<div class="zone"><div class="zn" style="background:var(--card2);color:var(--txt)">${d.ic}</div><div><b>${d.j}</b> · ${esc(d.t)}${d.info ? `<div class="mut small">${esc(d.info)}</div>` : ""}</div></div>`).join("")}
-    <p class="mut small">Les jours sont indicatifs : décalez si besoin, mais jamais deux séances dures d'affilée ni d'intensité la veille d'un match.</p></div>
+    <p class="mut small">Pourquoi cette organisation ? Voir « ⚽ Le plan et le foot » dans Séances › Guide.</p></div>
     <h2>Les 12 semaines</h2>`;
   for (const P of PLAN) {
-    const done = P.s.filter((_, i) => planKeyDone("w" + P.w + "-" + i)).length;
-    h += `<div class="week ${P.w === cw ? "cur" : ""}"><div class="row sp"><b>Semaine ${P.w} · ${P.phase}${P.w === cw ? " (en cours)" : ""}</b><span class="tag ${done === 4 ? "ok" : ""}">${done}/4</span></div>
+    const done = REQUIRED_SLOTS.filter(i => planKeyDone("w" + P.w + "-" + i)).length, optDone = OPTIONAL_SLOTS.some(i => planKeyDone("w" + P.w + "-" + i));
+    h += `<div class="week ${P.w === cw ? "cur" : ""}"><div class="row sp"><b>Semaine ${P.w} · ${P.phase}${P.w === cw ? " (en cours)" : ""}</b><span class="tag ${done === REQUIRED_SLOTS.length ? "ok" : ""}">${done}/${REQUIRED_SLOTS.length}${optDone ? " +1" : ""}</span></div>
       <p class="mut small">${fmtDate(addDays(S.settings.planStart, (P.w - 1) * 7))} → ${fmtDate(addDays(S.settings.planStart, (P.w - 1) * 7 + 6))} · ${esc(P.note)}</p>
-      ${P.s.map((id, i) => sessCard(SBY[id], { pk: "w" + P.w + "-" + i, label: SLOT_LABEL[i], done: planKeyDone("w" + P.w + "-" + i), date: fmtDateL(planSlotDate(P.w, i)) })).join("")}</div>`;
+      ${P.s.map((id, i) => sessCard(SBY[id], { pk: "w" + P.w + "-" + i, label: slotLabel(P, i) + (isOpt(i) ? " (facultatif)" : ""), done: planKeyDone("w" + P.w + "-" + i), date: fmtDateL(planSlotDate(P.w, i)), opt: isOpt(i) })).join("")}
+      <p class="mut small" style="margin:8px 2px 0">⚽ Mardi et jeudi : entraînement · dimanche : match.${P.alt ? ` Entraînement annulé ? Remplacement : <a href="#" data-act="sess" data-id="${P.alt}">${esc(SBY[P.alt].titre)}</a>.` : ""}</p></div>`;
   }
   return h;
 }
 
 /* ---------- Bibliothèque ---------- */
 function vLib() {
-  const segs = [["natation", "🏊 Natation"], ["velo", "🚴 Vélo"], ["educ", "🎓 Éducatifs"], ["guide", "❤️ Guide"]];
+  const segs = [["natation", "🏊 Natation"], ["velo", "🚴 Vélo"], ["educ", "🎥 Technique"], ["guide", "❤️ Guide"]];
   let h = `<h1>Séances & conseils</h1><div class="seg">${segs.map(([k, n]) => `<button class="${libTab === k ? "on" : ""}" data-act="lib" data-lib="${k}">${n}</button>`).join("")}</div>`;
   if (libTab === "natation" || libTab === "velo") {
     h += `<p class="mut small">${libTab === "natation" ? "Bassin de 25 m. Toutes les séances sont orientées cardio : technique + travail du souffle." : "Choisissez une route calme. Le minuteur bipe à chaque changement d'allure."}</p>`;
     h += SESSIONS.filter(s => s.type === libTab).map(s => sessCard(s)).join("");
   } else if (libTab === "educ") {
-    for (const g of ["Crawl", "Dos", "Général"]) h += `<h2>${g === "Dos" ? "Dos crawlé" : g}</h2>` + DRILLS.filter(d => d.nage === g).map(d => `<button class="sess" data-act="drill" data-id="${d.id}"><div class="ic swim">${d.securite ? "⚠️" : "🎓"}</div><div class="bd"><div class="t">${esc(d.nom)}</div><div class="m">${esc(d.niveau)} · ${esc(d.materiel.join(", "))}</div></div></button>`).join("");
+    h += `<p class="mut small">Chaque fiche contient un schéma (disponible hors connexion) et une ou plusieurs vidéos de démonstration (Internet nécessaire).</p>`;
+    for (const g of ["Nage complète", "Crawl", "Dos", "Général"]) h += `<h2>🏊 ${g === "Dos" ? "Éducatifs dos crawlé" : g === "Crawl" ? "Éducatifs crawl" : g === "Général" ? "Virage et jambes" : "La nage complète"}</h2>` + DRILLS.filter(d => d.nage === g).map(d => `<button class="sess" data-act="drill" data-id="${d.id}"><div class="ic swim">${d.securite ? "⚠️" : "🎓"}</div><div class="bd"><div class="t">${esc(d.nom)}</div><div class="m">${esc(d.niveau)} · ${(DRILL_VIDEOS[d.id] || []).length} vidéo(s) + schéma</div></div></button>`).join("");
+    h += `<h2>🚴 Technique vélo</h2>` + BIKE_TECH.map(b => `<button class="sess" data-act="btech" data-id="${b.id}"><div class="ic bike">${b.ic}</div><div class="bd"><div class="t">${esc(b.nom)}</div><div class="m">${b.vids.length} vidéo(s) + schéma</div></div></button>`).join("");
   } else h += guideHtml();
   return h;
 }
@@ -208,6 +223,7 @@ function guideHtml() {
     ${ZONES.map((z, i) => `<div class="zone"><div class="zn" style="background:${["#7fd3ff", "#2ee6a6", "#ffcf4a", "#ff8a3d", "#ff5d6c"][i]}">Z${z.z}</div><div><b>${z.nom}</b> · ${Math.round(m * z.pct[0] / 100)}-${Math.round(m * z.pct[1] / 100)} bpm · RPE ${z.rpe}<div class="mut small">Test de la parole : ${z.parole}</div></div></div>`).join("")}</div>
     <div class="card"><h3>L'échelle RPE (effort ressenti)</h3><ul class="dots mut"><li><b>1-2</b> très facile, récupération</li><li><b>3-4</b> facile, vous pouvez discuter : c'est l'endurance qui construit le « moteur »</li><li><b>5-6</b> soutenu, phrases courtes</li><li><b>7-8</b> dur, quelques mots</li><li><b>9-10</b> maximal, impossible de parler</li></ul>
     <p class="mut small">Pour progresser en cardio : environ 80 % du temps facile (zones 1-2) et 20 % dur (zones 4-5). Le foot apporte déjà beaucoup d'intensité.</p></div>
+    <div class="card"><h3>⚽ Le plan et le foot</h3><ul class="dots">${FOOT_LOGIC.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
     <div class="card"><h3>🏊 Sécurité natation</h3><ul class="dots">${SAFETY.natation.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
     <div class="card"><h3>🚴 Sécurité vélo</h3><ul class="dots">${SAFETY.velo.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
     <div class="card"><h3>⚽ Avec le foot</h3><ul class="dots">${SAFETY.general.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
@@ -218,6 +234,7 @@ function sessDetail(id, pk) {
   const s = SBY[id], swim = s.type === "natation";
   let h = head((s.test ? "⏱️ " : typeIc(s.type) + " ") + esc(s.titre), esc(s.focus));
   h += `<div class="row wrap" style="margin:8px 0"><span class="tag ${typeCl(s.type)}">${swim ? "Natation" : "Vélo"}</span><span class="tag">${esc(s.niveau)}</span>${swim ? `<span class="tag">${sessDist(s)} m</span>` : ""}<span class="tag">≈ ${sessMin(s)} min</span><span class="tag">RPE max ${sessRpe(s)}/10</span></div>`;
+  h += `<div class="card dgcard">${sessionProfile(s)}</div>`;
   if (swim && s.steps.some(x => x.drill === "hypoxie")) h += `<div class="warnbox">⚠️ Cette séance contient de l'hypoxie légère : uniquement sous surveillance, jamais d'hyperventilation ni d'apnée sous l'eau, arrêt au moindre inconfort.</div>`;
   let ph = "";
   h += `<ul class="steps">`;
@@ -226,9 +243,11 @@ function sessDetail(id, pk) {
     const qty = st.d ? (st.n > 1 ? st.n + " × " : "") + st.d + " m" : (st.n > 1 ? st.n + " × " : "") + fmtDur(st.s);
     h += `<li><b>${qty}</b> · ${esc(st.nom)}${st.r ? ` <span class="mut">· repos ${fmtDur(st.r)}</span>` : ""}
       <div class="mut small">Effort ${st.rpe}/10 · ${zoneTxt(st.rpe, swim)}</div>${st.how ? `<div class="small">${esc(st.how)}</div>` : ""}
-      ${st.drill ? `<button class="btn sm" style="margin-top:6px" data-act="drill" data-id="${st.drill}">🎓 Voir l'éducatif</button>` : ""}</li>`;
+      ${st.drill ? `<button class="btn sm" style="margin-top:6px" data-act="drill" data-id="${st.drill}">🎥 Éducatif : vidéo + schéma</button>` : swim && autoTech(st) ? `<button class="btn sm" style="margin-top:6px" data-act="drill" data-id="${autoTech(st)}">🎥 Technique ${autoTech(st) === "dos-complet" ? "du dos" : "du crawl"}</button>` : ""}</li>`;
   }
-  h += `</ul><div class="warnbox" style="background:var(--card2);border-color:var(--line)">${swim ? "Matériel : planche, palmes, pince-nez, lunettes. Posez le téléphone au bord dans une pochette étanche : il bipe au départ de chaque répétition. Sur iPhone, montez le volume et désactivez le mode silencieux pour entendre les bips." : "Casque, éclairage, bidon. Lancez le minuteur avant de partir et gardez les yeux sur la route : les bips vous guident (volume monté, mode silencieux désactivé)."}</div>
+  h += `</ul>`;
+  if (!swim && BIKE_SESSION_MEDIA[s.id]) { const M = BIKE_SESSION_MEDIA[s.id]; h += videoBlock(M.v, BTBY.echauffement.start) + `<div class="card"><h3>📚 Fiches technique pour cette séance</h3><div class="row wrap">${M.f.map(f => `<button class="btn sm" data-act="btech" data-id="${f}">${BTBY[f].ic} ${esc(BTBY[f].nom)}</button>`).join("")}</div></div>`; }
+  h += `<div class="warnbox" style="background:var(--card2);border-color:var(--line)">${swim ? "Matériel : planche, palmes, pince-nez, lunettes. Posez le téléphone au bord dans une pochette étanche : il bipe au départ de chaque répétition. Sur iPhone, montez le volume et désactivez le mode silencieux pour entendre les bips." : "Casque, éclairage, bidon. Lancez le minuteur avant de partir et gardez les yeux sur la route : les bips vous guident (volume monté, mode silencieux désactivé)."}</div>
     <button class="btn pri block pl-big" data-act="start" data-id="${s.id}" ${pk ? `data-pk="${pk}"` : ""}>▶ Démarrer avec le minuteur</button>
     <button class="btn block" style="margin-top:10px" data-act="log" data-id="${s.id}" ${pk ? `data-pk="${pk}"` : ""}>✓ Je l'ai faite sans minuteur</button>`;
   openSheet(h);
@@ -238,11 +257,19 @@ function drillDetail(id) {
   const d = DBY[id];
   openSheet(head("🎓 " + esc(d.nom), esc(d.nage) + " · " + esc(d.niveau)) +
     (d.securite ? `<div class="warnbox">⚠️ Exercice à risque s'il est mal fait : jamais seul, jamais d'hyperventilation, jamais d'apnée sous l'eau. Arrêt immédiat au moindre vertige.</div>` : "") +
+    (DIAG[d.id] ? `<div class="card dgcard">${DIAG[d.id]()}</div>` : "") +
+    videoBlock(DRILL_VIDEOS[d.id]) +
     `<div class="card"><h3>🎯 Objectif</h3><p>${esc(d.objectif)}</p></div>
      <div class="card"><h3>👣 Étapes</h3><ol style="padding-left:20px;margin:6px 0">${d.etapes.map(x => `<li style="margin:5px 0">${esc(x)}</li>`).join("")}</ol></div>
      <div class="card"><h3>❌ Erreurs fréquentes</h3><ul class="dots">${d.erreurs.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
      <div class="card"><h3>🧰 Matériel</h3><p>${esc(d.materiel.join(" · "))}</p></div>
      <button class="btn block" data-act="close">Fermer</button>`);
+}
+
+function bikeTechDetail(id) {
+  const b = BTBY[id];
+  openSheet(head(b.ic + " " + esc(b.nom), "Technique vélo") + (BDIAG[id] ? `<div class="card dgcard">${BDIAG[id]()}</div>` : "") + videoBlock(b.vids, b.start || {}) +
+    `<div class="card"><h3>👉 À retenir</h3><ul class="dots">${b.points.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div><button class="btn block" data-act="close">Fermer</button>`);
 }
 
 /* ---------- Saisie d'une séance ---------- */
@@ -413,7 +440,7 @@ function vProfil() {
       <div class="grid2"><button class="btn" data-act="export">⬇️ Exporter</button><button class="btn" data-act="import">⬆️ Importer</button></div><input type="file" id="impFile" accept=".json,application/json" class="hidden"></div>
     <div class="card"><h3>📲 Installer l'application</h3><p class="mut small">Dans Safari : bouton Partager, puis « Sur l'écran d'accueil ». Elle fonctionne ensuite sans réseau, même au bord du bassin.</p></div>
     <button class="btn block danger" style="margin-top:6px" data-act="reset">Tout effacer</button>
-    <p class="mut small" style="text-align:center;margin-top:18px">Nage &amp; Vélo Cardio · v1</p>`;
+    <p class="mut small" style="text-align:center;margin-top:18px">Nage &amp; Vélo Cardio · v2</p>`;
 }
 function exportData() {
   const blob = new Blob([JSON.stringify(S, null, 2)], { type: "application/json" }), a = document.createElement("a");
@@ -503,7 +530,7 @@ function drawPlayer() {
       <div class="pl-time" id="plTime">0:00</div>
       <div class="pl-rep">${rest ? "Prochain départ au bip" : (st.d ? "Appuyez sur « Fait » en touchant le mur" : "Bip à la fin") + " · effort " + st.rpe + "/10"}</div>
       ${!rest && (st.how || st.drill) ? `<div class="pl-how">${esc(st.how || DBY[st.drill].objectif)}</div>` : ""}
-      ${!rest && st.drill ? `<div><button class="btn sm" data-act="drill" data-id="${st.drill}">🎓 Voir l'éducatif</button></div>` : ""}
+      ${!rest && st.drill ? `<div><button class="btn sm" data-act="drill" data-id="${st.drill}">🎥 Voir l'éducatif</button></div>` : ""}
       ${!rest && st.r > 0 && nxt ? `<div class="pl-next">Ensuite : repos ${fmtDur(st.r)}, puis ${nxt.st.d ? nxt.st.d + " m" : fmtDur(nxt.st.s)} · ${esc(nxt.st.nom)}</div>` : nxt ? `<div class="pl-next">Ensuite : ${nxt.st.d ? nxt.st.d + " m" : fmtDur(nxt.st.s)} · ${esc(nxt.st.nom)}${nxt.n > 1 ? ` (${nxt.r}/${nxt.n})` : ""}</div>` : `<div class="pl-next">Dernière étape 💪</div>`}
     </div>
     <div class="pl-ctl"><button class="btn" data-act="plprev" aria-label="Précédent">⏮</button>
@@ -520,6 +547,7 @@ function playerSave() {
 /* ---------- Événements ---------- */
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b) return;
+  if (b.tagName === "A") e.preventDefault();
   const act = b.dataset.act, d = b.dataset;
   if (act.startsWith("pl")) audioInit();
   switch (act) {
@@ -528,6 +556,8 @@ document.addEventListener("click", e => {
     case "suivi": suiviTab = d.v; render(); break;
     case "sess": sessDetail(d.id, d.pk); break;
     case "drill": drillDetail(d.id); break;
+    case "btech": bikeTechDetail(d.id); break;
+    case "vplay": { const f = document.getElementById("vf-" + d.v); if (f) f.innerHTML = ytFrame(d.v, +d.s || 0); break; }
     case "close": closeSheet(); break;
     case "start": startSession(d.id, d.pk); break;
     case "log": logForm(d.id ? { sessionId: d.id, planKey: d.pk || null } : {}); break;

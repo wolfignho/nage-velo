@@ -3,6 +3,33 @@
 
 /* ---------- Éducatifs de natation ---------- */
 const DRILLS = [
+  { id: "crawl-complet", nage: "Nage complète", nom: "Le crawl complet (geste de référence)", niveau: "Tous niveaux",
+    materiel: ["Lunettes", "Pince-nez (option)"],
+    objectif: "Le modèle à avoir en tête pendant toutes vos longueurs de crawl : corps aligné, bras longs, respiration sur le côté, battements réguliers.",
+    etapes: ["Corps allongé et gainé, juste sous la surface : tête dans l'axe, regard vers le fond, bassin haut.",
+      "Entrée de la main devant l'épaule, doigts en premier, puis on allonge le bras vers l'avant.",
+      "Traction : le coude reste haut, l'avant-bras « accroche » l'eau et la pousse vers les pieds, sous le corps.",
+      "Poussée jusqu'à la cuisse, puis sortie de la main et retour aérien coude haut, bras relâché.",
+      "Le corps tourne d'un côté à l'autre (roulis) à chaque bras ; on respire en tournant la tête avec ce roulis.",
+      "Battements continus et souples depuis les hanches, pour équilibrer la nage."],
+    erreurs: ["Tête relevée vers l'avant : les jambes coulent.",
+      "Bras qui croisent l'axe du corps à l'entrée : on zigzague.",
+      "Traction coude bas (on « caresse » l'eau sans la pousser).",
+      "Mouvement de bras raccourci, qui s'arrête au ventre.",
+      "Bloquer l'air sous l'eau."] },
+  { id: "dos-complet", nage: "Nage complète", nom: "Le dos crawlé complet (geste de référence)", niveau: "Tous niveaux",
+    materiel: ["Pince-nez (recommandé)", "Lunettes"],
+    objectif: "Le modèle pour toutes vos longueurs de dos : tête fixe, hanches hautes, bras qui tournent en continu comme un moulin.",
+    etapes: ["Allongé sur le dos, oreilles dans l'eau, regard vers le plafond, menton légèrement rentré.",
+      "Hanches et ventre hauts, comme si on vous tirait par le nombril vers le plafond.",
+      "Bras tendu qui sort de l'eau pouce en premier et passe à la verticale au-dessus de l'épaule.",
+      "Entrée petit doigt en premier, dans l'alignement de l'épaule, puis traction coude plié jusqu'à la cuisse.",
+      "Les bras sont toujours opposés : quand l'un entre dans l'eau, l'autre sort.",
+      "Les épaules tournent à chaque mouvement de bras, la tête ne bouge pas. Battements continus, genoux sous l'eau."],
+    erreurs: ["Être « assis » dans l'eau, bassin bas.",
+      "Tête qui se relève pour regarder les pieds.",
+      "Entrée de la main derrière la tête.",
+      "Genoux qui sortent de l'eau (pédalage)."] },
   { id: "bat-planche", nage: "Crawl", nom: "Battements crawl avec planche", niveau: "Débutant",
     materiel: ["Planche", "Lunettes", "Palmes (option)"],
     objectif: "Des battements efficaces qui partent des hanches, un corps gainé et horizontal. Les jambes sont de gros muscles : elles font vite monter le cardio.",
@@ -193,7 +220,7 @@ const SESSIONS = [
       { p: "T", n: 4, d: 25, r: 15, rpe: 5, nom: "Respiration 3 temps", drill: "resp-3temps" },
       { p: "T", n: 4, d: 25, r: 20, rpe: 4, nom: "Virage simple et coulée", drill: "virage-simple", how: "Faites un virage au bout de chaque longueur." },
       { p: "C", n: 1, d: 300, r: 60, rpe: 6, nom: "300 m crawl continu", how: "Sans s'arrêter, avec virages. Si besoin, 10 s de pause au mur, pas plus." },
-      { p: "C", n: 8, d: 25, r: 20, rpe: 8, nom: "Battements intensifs planche", drill: "bat-intensifs" },
+      { p: "C", n: 6, d: 25, r: 20, rpe: 7, nom: "Battements soutenus planche", drill: "bat-intensifs", how: "Soutenu mais pas à fond : séance du vendredi, on garde des jambes fraîches pour le match." },
       { p: "C", n: 4, d: 50, r: 20, rpe: 5, nom: "50 m dos régulier" },
       { p: "R", n: 1, d: 100, r: 0, rpe: 2, nom: "Nage souple au choix" } ] },
   { id: "N6", type: "natation", titre: "Fractionné VO2 avec palmes", niveau: "Intermédiaire", focus: "Haute intensité, VO2max",
@@ -245,6 +272,23 @@ const SESSIONS = [
       { p: "C", n: 6, d: 25, r: 40, rpe: 9, nom: "Crawl palmes sprint", drill: "crawl-palmes" },
       { p: "C", n: 2, d: 100, r: 30, rpe: 6, nom: "100 m : 50 dos + 50 crawl" },
       { p: "R", n: 1, d: 100, r: 0, rpe: 2, nom: "Dos souple" } ] },
+  { id: "N11", type: "natation", titre: "Technique & aisance crawl + dos", niveau: "Débutant +", focus: "Technique, aérobie modéré, jambes épargnées",
+    steps: [
+      { p: "E", n: 4, d: 50, r: 15, rpe: 3, nom: "Nage souple crawl / dos", how: "Alternez crawl et dos à chaque 50 m." },
+      { p: "T", n: 4, d: 25, r: 20, rpe: 4, nom: "Crawl un bras", drill: "un-bras-crawl", how: "25 m bras droit, 25 m bras gauche." },
+      { p: "T", n: 4, d: 25, r: 20, rpe: 4, nom: "Dos un bras", drill: "dos-un-bras" },
+      { p: "T", n: 4, d: 25, r: 20, rpe: 4, nom: "Virage simple et coulée", drill: "virage-simple", how: "Un virage propre au bout de chaque longueur." },
+      { p: "C", n: 4, d: 100, r: 30, rpe: 6, nom: "100 m crawl aérobie", how: "Nage longue et relâchée, respiration 3 temps si possible. Même allure sur les 4." },
+      { p: "C", n: 4, d: 50, r: 20, rpe: 5, nom: "50 m dos régulier", how: "Tête fixe, hanches hautes." },
+      { p: "R", n: 1, d: 100, r: 0, rpe: 2, nom: "Nage souple au choix" } ] },
+  { id: "N12", type: "natation", titre: "Endurance technique : 200 m répétés", niveau: "Intermédiaire", focus: "Aérobie, nage continue, technique sous fatigue",
+    steps: [
+      { p: "E", n: 1, d: 200, r: 30, rpe: 3, nom: "200 m souple", how: "Crawl et dos au choix, sans s'arrêter." },
+      { p: "T", n: 4, d: 25, r: 15, rpe: 4, nom: "Rotation 6-3-6 avec palmes", drill: "rotation-636" },
+      { p: "T", n: 4, d: 25, r: 15, rpe: 4, nom: "Crawl rattrapé", drill: "rattrape" },
+      { p: "C", n: 3, d: 200, r: 45, rpe: 6, nom: "200 m crawl continu", how: "Allure confortable, virages sans pause, respiration 3 temps le plus souvent possible." },
+      { p: "C", n: 4, d: 50, r: 20, rpe: 5, nom: "50 m dos avec rotation des épaules", drill: "dos-rotation" },
+      { p: "R", n: 1, d: 100, r: 0, rpe: 2, nom: "Nage souple au choix" } ] },
   { id: "TN", type: "natation", test: true, titre: "Test cardio natation", niveau: "Tous niveaux", focus: "Mesurer vos progrès : 12 min + 100 m",
     steps: [
       { p: "E", n: 1, d: 200, r: 20, rpe: 3, nom: "200 m souple" },
@@ -312,6 +356,17 @@ const SESSIONS = [
       { p: "E", n: 1, s: 720, r: 0, rpe: 3, nom: "Échauffement progressif" },
       { p: "C", n: 2, s: 600, r: 300, rpe: 7, nom: "10 min au seuil (zone 4 basse)", how: "Effort 7/10 : quelques mots seulement, mais vous tenez. Respiration forte et rythmée." },
       { p: "R", n: 1, s: 300, r: 0, rpe: 2, nom: "Retour au calme" } ] },
+  { id: "V11", type: "velo", titre: "Endurance & vélocité", niveau: "Tous niveaux", focus: "Récupération active + technique de pédalage (lendemain de match)",
+    steps: [
+      { p: "E", n: 1, s: 600, r: 0, rpe: 3, nom: "Échauffement progressif", how: "Très facile au début, cadence 85-95 tr/min." },
+      { p: "C", n: 1, s: 900, r: 0, rpe: 4, nom: "Zone 2 continue", how: "Test de la parole : phrases complètes. Petit braquet." },
+      { p: "C", n: 4, s: 60, r: 120, rpe: 4, nom: "1 min de vélocité (100-110 tr/min)", how: "Petit braquet, on tourne vite les jambes SANS forcer : bassin immobile sur la selle. 2 min tranquilles entre chaque." },
+      { p: "R", n: 1, s: 300, r: 0, rpe: 2, nom: "Retour au calme" } ] },
+  { id: "V12", type: "velo", titre: "Activation veille de match", niveau: "Tous niveaux", focus: "Optionnel : réveiller les jambes sans se fatiguer",
+    steps: [
+      { p: "E", n: 1, s: 600, r: 0, rpe: 2, nom: "Pédalage très facile", how: "Zone 1, aucune sensation d'effort." },
+      { p: "C", n: 3, s: 15, r: 105, rpe: 5, nom: "Accélération souple de 15 s", how: "Cadence haute (100-110 tr/min), en souplesse, pas en force. Juste réveiller les jambes." },
+      { p: "R", n: 1, s: 300, r: 0, rpe: 2, nom: "Retour au calme", how: "Puis étirements doux, hydratation et bonne nuit de sommeil." } ] },
   { id: "TV", type: "velo", test: true, titre: "Test vélo 20 min", niveau: "Tous niveaux", focus: "Mesurer vos progrès : distance en 20 min",
     steps: [
       { p: "E", n: 1, s: 600, r: 0, rpe: 3, nom: "Échauffement progressif", how: "Allez jusqu'au début de votre parcours test (toujours le même, plat, peu de feux)." },
@@ -320,31 +375,46 @@ const SESSIONS = [
       { p: "R", n: 1, s: 600, r: 0, rpe: 2, nom: "Retour au calme" } ] }
 ];
 
-/* ---------- Plan 12 semaines : [vélo A (léger), natation A, natation B, vélo B (intense)] ---------- */
+/* ---------- Plan 12 semaines, construit autour du foot ----------
+   Foot : entraînement mardi + jeudi, match dimanche.
+   Créneaux : [lundi : vélo récup (J+1), mercredi : séance clé, vendredi : natation technique + aérobie, samedi : activation optionnelle]
+   alt = séance de fractionné vélo à faire UNIQUEMENT si un entraînement de foot est annulé. */
 const PLAN = [
-  { w: 1, phase: "Fondations", note: "Semaine de départ : vous faites vos tests initiaux pour avoir une base.", s: ["V1", "N1", "TN", "TV"] },
-  { w: 2, phase: "Fondations", note: "On installe la technique et le souffle.", s: ["V1", "N1", "N2", "V3"] },
-  { w: 3, phase: "Fondations", note: "Premières vraies séances de fractionné.", s: ["V1", "N2", "N3", "V4"] },
-  { w: 4, phase: "Fondations", note: "Semaine allégée + tests : comparez avec la semaine 1.", s: ["V2", "N3", "TN", "TV"], test: true },
-  { w: 5, phase: "Développement", note: "On augmente l'intensité et la nage continue.", s: ["V1", "N4", "N5", "V5"] },
-  { w: 6, phase: "Développement", note: "Arrivée du 4 × 4 min, la séance reine pour la VO2max.", s: ["V8", "N5", "N6", "V6"] },
-  { w: 7, phase: "Développement", note: "Côtes et seuil : la semaine la plus dure du bloc.", s: ["V1", "N6", "N7", "V7"] },
-  { w: 8, phase: "Développement", note: "Semaine allégée + tests de mi-parcours.", s: ["V2", "N4", "TN", "TV"], test: true },
-  { w: 9, phase: "Performance", note: "Volume et intensité au maximum du plan.", s: ["V8", "N7", "N8", "V6"] },
-  { w: 10, phase: "Performance", note: "Pyramides et endurance longue.", s: ["V8", "N8", "N9", "V9"] },
-  { w: 11, phase: "Performance", note: "Seuil long : vous devez sentir le progrès.", s: ["V8", "N9", "N10", "V10"] },
-  { w: 12, phase: "Performance", note: "Affûtage + tests finaux : le moment de mesurer vos progrès.", s: ["V2", "N10", "TN", "TV"], test: true }
+  { w: 1, phase: "Fondations", note: "Semaine de départ : test vélo le mercredi, test natation le vendredi. Votre cours de natation du jeudi est un bonus, pas une obligation.", s: ["V2", "TV", "TN", "V12"], test: true, alt: null },
+  { w: 2, phase: "Fondations", note: "On installe la technique et le souffle, sans se mettre dans le rouge.", s: ["V2", "N1", "N2", "V12"], alt: "V3" },
+  { w: 3, phase: "Fondations", note: "Première vraie séance de fractionné en natation le mercredi.", s: ["V1", "N3", "N11", "V12"], alt: "V4" },
+  { w: 4, phase: "Fondations", note: "Semaine allégée + tests : comparez avec la semaine 1.", s: ["V2", "TV", "TN", "V12"], test: true, alt: null },
+  { w: 5, phase: "Développement", note: "Le fractionné natation monte d'un cran, le vendredi reste en aisance.", s: ["V1", "N4", "N5", "V12"], alt: "V5" },
+  { w: 6, phase: "Développement", note: "Séance VO2 avec palmes le mercredi : la plus dure du bloc.", s: ["V11", "N6", "N11", "V12"], alt: "V6" },
+  { w: 7, phase: "Développement", note: "Seuil le mercredi, endurance longue le vendredi.", s: ["V1", "N7", "N9", "V12"], alt: "V7" },
+  { w: 8, phase: "Développement", note: "Semaine allégée + tests de mi-parcours.", s: ["V2", "TV", "TN", "V12"], test: true, alt: null },
+  { w: 9, phase: "Performance", note: "Pyramide intensive le mercredi, 200 m répétés le vendredi.", s: ["V11", "N8", "N12", "V12"], alt: "V6" },
+  { w: 10, phase: "Performance", note: "Retour du VO2 avec palmes : vous devez sentir le progrès.", s: ["V1", "N6", "N9", "V12"], alt: "V9" },
+  { w: 11, phase: "Performance", note: "Affûtage : qualité et vitesse, sans fatigue inutile.", s: ["V11", "N10", "N12", "V12"], alt: "V10" },
+  { w: 12, phase: "Performance", note: "Semaine allégée + tests finaux : le moment de mesurer vos progrès.", s: ["V2", "TV", "TN", "V12"], test: true, alt: null }
 ];
-const SLOT_DAYS = [0, 1, 3, 4]; // lundi, mardi, jeudi, vendredi (0 = lundi)
-const SLOT_LABEL = ["Vélo A", "Natation A", "Natation B", "Vélo B"];
+const SLOT_DAYS = [0, 2, 4, 5]; // lundi, mercredi, vendredi, samedi (0 = lundi)
+const SLOT_LABEL = ["Lundi · récup J+1", "Mercredi · séance clé", "Vendredi · technique + aérobie", "Samedi · option veille de match"];
+const OPTIONAL_SLOTS = [3];
+const REQUIRED_SLOTS = [0, 1, 2];
 const WEEK_TEMPLATE = [
-  { j: "Lundi", t: "Vélo A : endurance / récupération", ic: "🚴", info: "Tourne les jambes après le match du dimanche." },
-  { j: "Mardi", t: "Natation A", ic: "🏊", info: "" },
-  { j: "Mercredi", t: "Entraînement foot ou repos", ic: "⚽", info: "Si pas d'entraînement : repos complet ou marche." },
-  { j: "Jeudi", t: "Natation B", ic: "🏊", info: "Si vous avez cours de natation ce jour-là, le cours peut remplacer la séance (notez-la quand même)." },
-  { j: "Vendredi", t: "Vélo B : séance intense", ic: "🚴", info: "À 48 h du match : c'est le bon moment pour l'intensité." },
-  { j: "Samedi", t: "Repos", ic: "😴", info: "Repos, hydratation, sommeil : on arrive frais au match." },
+  { j: "Lundi", t: "Vélo récupération / endurance douce", ic: "🚴", info: "Lendemain de match : 25 à 45 min en zone 1-2 pour faire tourner les jambes et éliminer la fatigue. Si le match a été très dur ou si vous avez des courbatures, faites la récupération active (20 min)." },
+  { j: "Mardi", t: "Entraînement de foot", ic: "⚽", info: "Pas de séance de l'application. L'entraînement compte comme une séance intense." },
+  { j: "Mercredi", t: "Séance clé : natation cardio", ic: "🏊", info: "À 72 h du match et loin du suivant : c'est le meilleur jour pour l'intensité. Nager fait travailler le cœur sans chocs pour les jambes, l'entraînement du jeudi n'est donc pas pénalisé. Semaines de tests : test vélo ce jour-là." },
+  { j: "Jeudi", t: "Entraînement de foot", ic: "⚽", info: "Cours de natation (ex. ce jeudi à 13 h 30) : un bonus facultatif, à faire en mode technique, sans forcer. Notez-le en « séance libre / cours » si vous y allez." },
+  { j: "Vendredi", t: "Natation technique + aérobie modéré", ic: "🏊", info: "À 48 h du match : effort modéré (RPE 7 maximum), pas de sprint ni de grosse série de jambes. Semaines de tests : test natation ce jour-là." },
+  { j: "Samedi", t: "Repos (ou activation très légère, facultative)", ic: "😴", info: "Veille de match : rien d'intense. Repos complet, ou 20 min de vélo très facile avec 3 accélérations souples. Hydratation et sommeil." },
   { j: "Dimanche", t: "Match de foot", ic: "⚽", info: "Le match compte comme une grosse séance de cardio." }
+];
+const FOOT_LOGIC = [
+  "Votre semaine compte déjà 3 efforts intenses de foot (entraînements mardi et jeudi, match dimanche). L'application ajoute 3 séances, plus une option, sans jamais doubler une journée de foot.",
+  "Lundi, lendemain de match : vélo très facile. Le pédalage sans impact fait circuler le sang et accélère la récupération.",
+  "Mercredi : séance clé de la semaine. C'est le jour le plus loin des deux matchs (J+3 et J−4), et la natation fait monter le cardio sans chocs ni contacts : les jambes restent disponibles pour le jeudi.",
+  "Vendredi, à 48 h du match : natation technique et aérobie modérée. On progresse en souffle et en geste sans arriver fatigué le dimanche.",
+  "Samedi, veille de match : repos, ou 20 min d'activation très légère si vous en avez envie. Jamais d'intensité.",
+  "Le fractionné vélo (30/30, 4 × 4 min, côtes, seuil) reste dans la bibliothèque. Faites-le seulement si un entraînement de foot du mardi ou du jeudi est annulé : c'est la séance « remplacement » indiquée chaque semaine.",
+  "Les cours de natation sont un bonus : faites-les en technique, sans ajouter d'intensité les jours d'entraînement.",
+  "Semaines 4, 8 et 12 : semaines allégées avec les tests. Si vous êtes très fatigué ou si vous avez deux matchs dans la semaine, sautez la séance du vendredi."
 ];
 
 /* ---------- Jalons techniques ---------- */
@@ -396,7 +466,8 @@ const SAFETY = {
     "Fractionné : choisissez une route calme ou une piste cyclable, jamais de sprint en ville ou aux intersections.",
     "Hydratation : un bidon pour toute sortie de plus de 30 min ; mangez quelque chose au-delà d'1 h.",
     "Avant de partir : pneus gonflés, freins qui répondent, chaîne graissée.", "Gardez les yeux sur la route, pas sur le téléphone : lancez le minuteur avant de partir, il bipe tout seul."],
-  general: ["Jamais deux séances intenses deux jours de suite, et pas d'intensité la veille d'un match.",
+  general: ["Pas d'intensité la veille d'un match, et jamais de fractionné vélo la veille d'un entraînement de foot.",
+    "Match décalé au samedi ? Décalez tout d'un jour : vélo récup le dimanche, rien d'intense le vendredi.",
     "Douleur articulaire ou fatigue anormale : remplacez la séance par de la récupération active.",
     "En cas de doute sur votre santé (antécédents cardiaques, essoufflement inhabituel), demandez l'avis d'un médecin."]
 };
