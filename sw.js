@@ -1,5 +1,5 @@
 /* Nage & Vélo Cardio — service worker (hors connexion) */
-const CACHE = "nage-velo-v2";
+const CACHE = "nage-velo-v3";
 const ASSETS = ["./", "./index.html", "./app.css", "./app.js", "./data.js", "./media.js", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png", "./icons/icon-maskable-512.png", "./icons/favicon-64.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS.map(u => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting())); });

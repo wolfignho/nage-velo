@@ -100,7 +100,7 @@ function badgeList() {
     ["week", "✅", "Semaine parfaite", mons.some(m => weekStats(m).n >= g)], ["streak4", "📆", "4 semaines d'affilée", bestStreak() >= 4],
     ["test1", "⏱️", "Premier test", S.tests.length >= 1], ["prog", "📈", "Progrès mesuré", improved],
     ["sub2", "⚡", "100 m sous 2:00", (bestTest("swim100") || 999) < 120], ["c500", "🎖️", "500 m en 12 min", (bestTest("swim12") || 0) >= 500],
-    ["vo2", "🫁", "4 × 4 min bouclé", L.some(l => l.sessionId === "V6")], ["ms8", "🧠", "8 jalons techniques", ms >= 8],
+    ["vo2", "🫁", "4 × 4 min bouclé", L.some(l => l.sessionId === "V6")], ["brasse", "🐸", "Brasse validée (50 m continu)", !!S.milestones.m21], ["ms8", "🧠", "8 jalons techniques", ms >= 8],
     ["msall", "🥇", "Tous les jalons", ms >= MILESTONES.length], ["half", "🌗", "Moitié du plan", planDone >= PLAN_REQ_TOTAL / 2], ["plan", "👑", "Plan 12 semaines terminé", planDone >= PLAN_REQ_TOTAL]
   ].map(([id, e, n, ok]) => ({ id, e, n, ok }));
 }
@@ -212,7 +212,7 @@ function vLib() {
     h += SESSIONS.filter(s => s.type === libTab).map(s => sessCard(s)).join("");
   } else if (libTab === "educ") {
     h += `<p class="mut small">Chaque fiche contient un schéma (disponible hors connexion) et une ou plusieurs vidéos de démonstration (Internet nécessaire).</p>`;
-    for (const g of ["Nage complète", "Crawl", "Dos", "Général"]) h += `<h2>🏊 ${g === "Dos" ? "Éducatifs dos crawlé" : g === "Crawl" ? "Éducatifs crawl" : g === "Général" ? "Virage et jambes" : "La nage complète"}</h2>` + DRILLS.filter(d => d.nage === g).map(d => `<button class="sess" data-act="drill" data-id="${d.id}"><div class="ic swim">${d.securite ? "⚠️" : "🎓"}</div><div class="bd"><div class="t">${esc(d.nom)}</div><div class="m">${esc(d.niveau)} · ${(DRILL_VIDEOS[d.id] || []).length} vidéo(s) + schéma</div></div></button>`).join("");
+    for (const g of ["Nage complète", "Crawl", "Dos", "Brasse", "Général"]) h += `<h2>${g === "Brasse" ? "🐸" : "🏊"} ${g === "Dos" ? "Éducatifs dos crawlé" : g === "Crawl" ? "Éducatifs crawl" : g === "Brasse" ? "Éducatifs brasse" : g === "Général" ? "Virage et jambes" : "La nage complète"}</h2>` + DRILLS.filter(d => d.nage === g).map(d => `<button class="sess" data-act="drill" data-id="${d.id}"><div class="ic swim">${d.securite ? "⚠️" : "🎓"}</div><div class="bd"><div class="t">${esc(d.nom)}</div><div class="m">${esc(d.niveau)} · ${(DRILL_VIDEOS[d.id] || []).length} vidéo(s) + schéma</div></div></button>`).join("");
     h += `<h2>🚴 Technique vélo</h2>` + BIKE_TECH.map(b => `<button class="sess" data-act="btech" data-id="${b.id}"><div class="ic bike">${b.ic}</div><div class="bd"><div class="t">${esc(b.nom)}</div><div class="m">${b.vids.length} vidéo(s) + schéma</div></div></button>`).join("");
   } else h += guideHtml();
   return h;
@@ -235,6 +235,7 @@ function sessDetail(id, pk) {
   let h = head((s.test ? "⏱️ " : typeIc(s.type) + " ") + esc(s.titre), esc(s.focus));
   h += `<div class="row wrap" style="margin:8px 0"><span class="tag ${typeCl(s.type)}">${swim ? "Natation" : "Vélo"}</span><span class="tag">${esc(s.niveau)}</span>${swim ? `<span class="tag">${sessDist(s)} m</span>` : ""}<span class="tag">≈ ${sessMin(s)} min</span><span class="tag">RPE max ${sessRpe(s)}/10</span></div>`;
   h += `<div class="card dgcard">${sessionProfile(s)}</div>`;
+  if (swim && s.steps.some(x => /brasse/i.test(x.nom) || (DBY[x.drill] && DBY[x.drill].genou))) h += `<div class="warnbox">${KNEE_TXT}</div>`;
   if (swim && s.steps.some(x => x.drill === "hypoxie")) h += `<div class="warnbox">⚠️ Cette séance contient de l'hypoxie légère : uniquement sous surveillance, jamais d'hyperventilation ni d'apnée sous l'eau, arrêt au moindre inconfort.</div>`;
   let ph = "";
   h += `<ul class="steps">`;
@@ -243,7 +244,7 @@ function sessDetail(id, pk) {
     const qty = st.d ? (st.n > 1 ? st.n + " × " : "") + st.d + " m" : (st.n > 1 ? st.n + " × " : "") + fmtDur(st.s);
     h += `<li><b>${qty}</b> · ${esc(st.nom)}${st.r ? ` <span class="mut">· repos ${fmtDur(st.r)}</span>` : ""}
       <div class="mut small">Effort ${st.rpe}/10 · ${zoneTxt(st.rpe, swim)}</div>${st.how ? `<div class="small">${esc(st.how)}</div>` : ""}
-      ${st.drill ? `<button class="btn sm" style="margin-top:6px" data-act="drill" data-id="${st.drill}">🎥 Éducatif : vidéo + schéma</button>` : swim && autoTech(st) ? `<button class="btn sm" style="margin-top:6px" data-act="drill" data-id="${autoTech(st)}">🎥 Technique ${autoTech(st) === "dos-complet" ? "du dos" : "du crawl"}</button>` : ""}</li>`;
+      ${st.drill ? `<button class="btn sm" style="margin-top:6px" data-act="drill" data-id="${st.drill}">🎥 Éducatif : vidéo + schéma</button>` : swim && autoTech(st) ? `<button class="btn sm" style="margin-top:6px" data-act="drill" data-id="${autoTech(st)}">🎥 Technique ${autoTech(st) === "dos-complet" ? "du dos" : autoTech(st) === "brasse-complet" ? "de la brasse" : "du crawl"}</button>` : ""}</li>`;
   }
   h += `</ul>`;
   if (!swim && BIKE_SESSION_MEDIA[s.id]) { const M = BIKE_SESSION_MEDIA[s.id]; h += videoBlock(M.v, BTBY.echauffement.start) + `<div class="card"><h3>📚 Fiches technique pour cette séance</h3><div class="row wrap">${M.f.map(f => `<button class="btn sm" data-act="btech" data-id="${f}">${BTBY[f].ic} ${esc(BTBY[f].nom)}</button>`).join("")}</div></div>`; }
@@ -252,10 +253,12 @@ function sessDetail(id, pk) {
     <button class="btn block" style="margin-top:10px" data-act="log" data-id="${s.id}" ${pk ? `data-pk="${pk}"` : ""}>✓ Je l'ai faite sans minuteur</button>`;
   openSheet(h);
 }
+const KNEE_TXT = "🦵 Brasse et genou : le fouetté sollicite l'intérieur du genou. Si votre genou gauche (ou l'autre) vous fait mal ou est encore bandé, ne forcez pas : fouetté plus petit et plus lent, ou battements de crawl à la place des jambes de brasse. Pas de palmes pour les jambes de brasse.";
 function fmtDur(sec) { if (sec < 60) return sec + " s"; const m = Math.floor(sec / 60), r = sec % 60; return r ? m + " min " + pad(r) : m + " min"; }
 function drillDetail(id) {
   const d = DBY[id];
   openSheet(head("🎓 " + esc(d.nom), esc(d.nage) + " · " + esc(d.niveau)) +
+    (d.genou ? `<div class="warnbox">${KNEE_TXT}</div>` : "") +
     (d.securite ? `<div class="warnbox">⚠️ Exercice à risque s'il est mal fait : jamais seul, jamais d'hyperventilation, jamais d'apnée sous l'eau. Arrêt immédiat au moindre vertige.</div>` : "") +
     (DIAG[d.id] ? `<div class="card dgcard">${DIAG[d.id]()}</div>` : "") +
     videoBlock(DRILL_VIDEOS[d.id]) +
@@ -366,7 +369,7 @@ function vSuivi() {
   } else {
     const n = Object.keys(S.milestones).length;
     h += `<p class="mut">Cochez chaque jalon quand vous l'avez réussi (+25 XP). ${n}/${MILESTONES.length} validés.</p><div class="bar"><i style="width:${n / MILESTONES.length * 100}%"></i></div>`;
-    for (const g of ["Crawl", "Dos", "Général", "Souffle", "Vélo"]) {
+    for (const g of ["Crawl", "Dos", "Brasse", "Général", "Souffle", "Vélo"]) {
       h += `<h3 style="margin-top:16px">${g}</h3>` + MILESTONES.filter(m => m.g === g).map(m => `<button class="check ${S.milestones[m.id] ? "on" : ""}" data-act="ms" data-id="${m.id}"><span class="bx">${S.milestones[m.id] ? "✓" : ""}</span><span>${esc(m.t)}${S.milestones[m.id] ? `<span class="mut small"> · ${fmtDate(S.milestones[m.id])}</span>` : ""}</span></button>`).join("");
     }
   }
@@ -440,7 +443,7 @@ function vProfil() {
       <div class="grid2"><button class="btn" data-act="export">⬇️ Exporter</button><button class="btn" data-act="import">⬆️ Importer</button></div><input type="file" id="impFile" accept=".json,application/json" class="hidden"></div>
     <div class="card"><h3>📲 Installer l'application</h3><p class="mut small">Dans Safari : bouton Partager, puis « Sur l'écran d'accueil ». Elle fonctionne ensuite sans réseau, même au bord du bassin.</p></div>
     <button class="btn block danger" style="margin-top:6px" data-act="reset">Tout effacer</button>
-    <p class="mut small" style="text-align:center;margin-top:18px">Nage &amp; Vélo Cardio · v2</p>`;
+    <p class="mut small" style="text-align:center;margin-top:18px">Nage &amp; Vélo Cardio · v3</p>`;
 }
 function exportData() {
   const blob = new Blob([JSON.stringify(S, null, 2)], { type: "application/json" }), a = document.createElement("a");

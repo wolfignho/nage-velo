@@ -30,6 +30,27 @@ const VIDEOS = {
   "MC8CVDMGIFM": { t: "Le secret des battements en crawl", c: "apprentissage natation" },
   "APGI2oyAcIQ": { t: "Respirer comme les pros - Les 4 niveaux de respiration en crawl", c: "apprentissage natation" },
   "qzEd5uB7aV8": { t: "Éducatif natation - Respiration 3/5/7 temps", c: "Saint Florent Triathlon" },
+  /* Brasse */
+  "bwpfKJLQgaA": { t: "Tuto 11 : Les bases techniques de la brasse", c: "Fédération Française de Natation" },
+  "2XmFgN0E-6E": { t: "Apprendre la technique de base | Brasse coulée", c: "SIKANA Français" },
+  "_hJMe25lgc0": { t: "Erreurs fatales en brasse (comment les éviter ?)", c: "apprentissage natation" },
+  "VlhoAbKEM7U": { t: "Apprendre le mouvement des jambes | Brasse coulée", c: "SIKANA Français" },
+  "GSDx2XoqQHM": { t: "Apprendre la brasse - perfectionnement du mouvement de jambes", c: "Natation pour tous" },
+  "MfzGNT06l8I": { t: "Éducatif natation - Jambes de brasse sur le dos", c: "OpenSwim" },
+  "jNt0mPcFDf4": { t: "Apprendre la brasse - Le mouvement des jambes", c: "Natation pour tous" },
+  "OCixoIWIgJI": { t: "Brasse avec battements", c: "Natation pour tous" },
+  "wrb9AWgW_MA": { t: "Tuto brasse - Brasse battements (éducatif brasse #1)", c: "apprentissage natation" },
+  "cKGoGMQpNWU": { t: "Apprendre le mouvement des bras | Brasse coulée", c: "SIKANA Français" },
+  "-FCjF19jtZI": { t: "Comment synchroniser les mouvements des jambes et des bras | Brasse coulée", c: "SIKANA Français" },
+  "kkgGVAWBA-U": { t: "Apprendre la brasse : associer jambes et respiration", c: "Natation pour tous" },
+  "h4z9O-QBGTA": { t: "Apprendre la brasse - Étapes finales", c: "Natation pour tous" },
+  "4T0gcsxThxw": { t: "Exercice technique en brasse : 1 fois les bras, 2 fois les jambes", c: "Natation pour tous" },
+  "BglWOmWH62I": { t: "Éducatif natation - Brasse 2 jambes 1 bras", c: "OpenSwim" },
+  "Eyleud2hC74": { t: "Exercice pour améliorer le mouvement des jambes | Brasse coulée", c: "SIKANA Français" },
+  "xvUwadHDkCE": { t: "Exercice : Brasse avec une pause", c: "Natation pour tous" },
+  "fT0X9dqK1Wg": { t: "Brasse - Technique imbattable pour une nage efficace et relaxante", c: "apprentissage natation" },
+  "H7qPxwxv1ig": { t: "Comment faire un virage | Brasse coulée", c: "SIKANA Français" },
+  "6pCUlfrdHAI": { t: "Le virage en brasse", c: "Natation pour tous" },
   /* Vélo */
   "gYciHFqyK3Y": { t: "Comment savoir si votre hauteur de selle est la bonne ?", c: "GCN en Français" },
   "JgwL9sFUkL0": { t: "TUTO - Bien régler votre vélo route avant une sortie", c: "Decathlon FR" },
@@ -61,7 +82,15 @@ const DRILL_VIDEOS = {
   "dos-rotation": ["f1KmUSaDceg", "8P0POBWbYFE"],
   "virage-simple": ["UgrnNEMXmpM", "m7DE6OOEkoQ"],
   "bat-intensifs": ["4G8KzYTD0JY", "MC8CVDMGIFM"],
-  "hypoxie": ["APGI2oyAcIQ", "qzEd5uB7aV8"]
+  "hypoxie": ["APGI2oyAcIQ", "qzEd5uB7aV8"],
+  "brasse-complet": ["bwpfKJLQgaA", "2XmFgN0E-6E", "_hJMe25lgc0"],
+  "br-jambes-planche": ["VlhoAbKEM7U", "GSDx2XoqQHM"],
+  "br-jambes-dos": ["MfzGNT06l8I", "jNt0mPcFDf4"],
+  "br-bras-battements": ["OCixoIWIgJI", "wrb9AWgW_MA", "cKGoGMQpNWU"],
+  "br-coordination": ["-FCjF19jtZI", "kkgGVAWBA-U", "h4z9O-QBGTA"],
+  "br-2j1b": ["4T0gcsxThxw", "BglWOmWH62I", "Eyleud2hC74"],
+  "br-glisse": ["xvUwadHDkCE", "fT0X9dqK1Wg"],
+  "br-virage": ["H7qPxwxv1ig", "6pCUlfrdHAI"]
 };
 
 /* ---------- Fiches technique vélo ---------- */
@@ -133,7 +162,8 @@ const BIKE_SESSION_MEDIA = {
 function autoTech(st) {
   if (st.drill) return st.drill;
   const n = (st.nom + " " + (st.how || "")).toLowerCase();
-  const crawl = n.includes("crawl"), dos = n.includes("dos");
+  const crawl = n.includes("crawl"), dos = n.includes("dos"), brasse = n.includes("brasse");
+  if (brasse && !crawl && !dos) return "brasse-complet";
   if (crawl) return "crawl-complet";
   if (dos) return "dos-complet";
   return null;
@@ -268,6 +298,86 @@ const DIAG = {
     L(262, 92, 316, 92, "dg-torso") + C(276, 92, 7) + L(268, 92, 254, 92) + AR("M300 112 h-46", "dg-path acc") + bubbles(282, 80) + T(297, 150, "4 flèche", "middle", "dg-lbl b") +
     T(170, 180, "Toucher, tourner, pousser sur le côté, glisser 2-3 s.", "middle", "dg-lbl"), "Virage simple et coulée")
 };
+
+/* ---------- Schémas brasse ---------- */
+/* Nageur de brasse vu du dessus, tête à droite. arms : "front" | "pull" | "side" ; legs : "tendues" | "repli" */
+function frogTop(cx, cy, o = {}) {
+  let g = `<ellipse cx="${cx}" cy="${cy}" rx="40" ry="15" class="dg-skinfill"/>` + C(cx + 52, cy, 10);
+  const sh = [cx + 32, cy], hp = [cx - 34, cy];
+  for (const sg of [-1, 1]) {
+    const back = "";
+    const S = [sh[0], sh[1] + sg * 11], H = [hp[0], hp[1] + sg * 8];
+    if (o.arms === "pull") g += `<polyline points="${S[0]},${S[1]} ${S[0] + 20},${S[1] + sg * 22} ${S[0] + 46},${S[1] + sg * 26}" class="dg-limb${back}"/>`;
+    else if (o.arms === "side") g += `<polyline points="${S[0]},${S[1]} ${S[0] - 4},${S[1] + sg * 22} ${S[0] - 22},${S[1] + sg * 30}" class="dg-limb${back}"/>`;
+    else if (o.arms !== "none") g += `<polyline points="${S[0]},${S[1]} ${S[0] + 34},${S[1] - sg * 3} ${S[0] + 68},${S[1] - sg * 6}" class="dg-limb${back}"/>`;
+    if (o.legs === "repli") {
+      const K = [H[0] - 34, H[1] + sg * 12], A = [H[0] - 12, H[1] + sg * 28];
+      g += `<polyline points="${H[0]},${H[1]} ${K[0]},${K[1]} ${A[0]},${A[1]}" class="dg-limb${back}"/>` + L(A[0], A[1], A[0] - 3, A[1] + sg * 13, "dg-limb thin" + back);
+    } else g += `<polyline points="${H[0]},${H[1]} ${H[0] - 40},${H[1] - sg * 4} ${H[0] - 78},${H[1] - sg * 6}" class="dg-limb${back}"/>` + L(H[0] - 78, H[1] - sg * 6, H[0] - 90, H[1] - sg * 6, "dg-limb thin" + back);
+  }
+  return g;
+}
+/* Cases de séquence (ex. tirer → respirer → pousser → glisser) */
+const frogAt = (x, y, k, o) => `<g transform="translate(${x} ${y}) scale(${k})">${frogTop(0, 0, o)}</g>`;
+function seqBoxes(y, items, w = 74, gap = 8, x0 = 14) {
+  return items.map((it, i) => { const x = x0 + i * (w + gap); return `<rect x="${x}" y="${y}" width="${w}" height="34" rx="8" class="${it.c || "dg-easy"}"/>` + T(x + w / 2, y + 15, it.t, "middle", "dg-lbl b") + (it.s ? T(x + w / 2, y + 28, it.s, "middle", "dg-lbl mini") : "") + (i < items.length - 1 ? AR(`M${x + w + 1} ${y + 17} h${gap - 2}`, "dg-path acc") : ""); }).join("");
+}
+/* Pied vu de côté : flexion (canard) ou pointe */
+function footSide(x, y, flex) {
+  return L(x, y - 26, x, y, "dg-limb") + (flex ? L(x, y, x + 18, y - 4, "dg-limb thin") : L(x, y, x + 4, y + 18, "dg-limb thin"));
+}
+Object.assign(DIAG, {
+  "brasse-complet": () => svg(340, 230, `<rect x="0" y="0" width="340" height="140" class="dg-water"/>` + T(334, 134, "vu du dessus", "end", "dg-lbl mini") +
+    frogTop(170, 76, { arms: "pull", legs: "repli" }) +
+    P("M300 66 Q300 38 252 40 Q232 46 236 70", "dg-path dash acc", 'marker-end="url(#ar)"') + P("M300 86 Q300 114 252 112 Q232 106 236 82", "dg-path dash acc", 'marker-end="url(#ar)"') +
+    P("M128 42 Q70 30 46 72", "dg-path dash", 'marker-end="url(#ar)"') + P("M128 110 Q70 122 46 80", "dg-path dash", 'marker-end="url(#ar)"') +
+    T(334, 30, "bras : tirer jusqu'aux épaules", "end", "dg-lbl mini") + T(6, 28, "jambes : pousser en demi-cercle", "start", "dg-lbl mini") + T(100, 134, "pieds en canard", "middle", "dg-lbl mini") +
+    seqBoxes(152, [{ t: "1 tirer", s: "bras" }, { t: "2 respirer", s: "tête sort" }, { t: "3 pousser", s: "jambes" }, { t: "4 glisser", s: "1-2 s", c: "dg-hard" }]) +
+    T(170, 210, "Bras et jambes ne travaillent jamais en même temps.", "middle", "dg-lbl") + T(170, 226, "Ce sont surtout les jambes qui font avancer.", "middle", "dg-lbl mini"), "Schéma de la brasse complète"),
+  "br-jambes-planche": () => svg(340, 230, `<rect x="0" y="0" width="340" height="132" class="dg-water"/>` + T(334, 16, "vu du dessus", "end", "dg-lbl mini") +
+    frogTop(190, 72, { arms: "front", legs: "repli" }) + `<rect x="296" y="52" width="36" height="40" rx="6" class="dg-board"/>` +
+    P("M140 40 Q76 26 52 66", "dg-path dash acc", 'marker-end="url(#ar)"') + P("M140 104 Q76 118 52 78", "dg-path dash acc", 'marker-end="url(#ar)"') +
+    T(232, 124, "1 talons vers les fesses", "middle", "dg-lbl mini") + T(8, 30, "3 pousser l'eau en arrière", "start", "dg-lbl mini") + T(8, 120, "4 jambes serrées, glisse", "start", "dg-lbl mini") + T(314, 44, "planche", "middle", "dg-lbl mini") +
+    `<rect x="14" y="142" width="150" height="62" rx="10" class="dg-easy"/>` + footSide(54, 186, true) + T(110, 168, "2 pied fléchi", "middle", "dg-lbl b") + T(110, 184, "« en canard » ✓", "middle", "dg-lbl mini") +
+    `<rect x="176" y="142" width="150" height="62" rx="10" class="dg-stop"/>` + footSide(216, 176, false) + T(272, 168, "pied en pointe", "middle", "dg-lbl b") + T(272, 184, "aucune prise ✗", "middle", "dg-lbl mini") +
+    T(170, 222, "Genoux pas plus larges que les hanches. Sans palmes.", "middle", "dg-lbl"), "Jambes de brasse avec planche"),
+  "br-jambes-dos": () => svg(340, 200, water(340, 200, 70) +
+    `<rect x="214" y="58" width="44" height="8" rx="3" class="dg-board"/>` + L(170, 66, 240, 64, "dg-torso") + C(258, 60, 10) + C(261, 51, 2.2, "dg-dark") +
+    `<polyline points="170,66 132,94 106,72" class="dg-limb"/>` + L(106, 72, 100, 60, "dg-limb thin") + `<polyline points="170,68 124,72 82,74" class="dg-limb back"/>` +
+    P("M100 58 Q62 70 74 98", "dg-path dash acc", 'marker-end="url(#ar)"') + T(132, 112, "genou SOUS l'eau", "middle", "dg-lbl mini") + T(60, 50, "pied fléchi", "middle", "dg-lbl mini") + T(40, 118, "pousser", "middle", "dg-lbl mini") +
+    AR("M214 104 v-32", "dg-path acc") + T(218, 118, "hanches hautes", "middle", "dg-lbl mini") + T(336, 92, "oreilles dans l'eau", "end", "dg-lbl mini") +
+    T(170, 152, "Descendez les talons sous vous (pas les genoux vers le ventre),", "middle", "dg-lbl") + T(170, 170, "pieds en canard, puis poussez jusqu'à jambes serrées.", "middle", "dg-lbl") + T(170, 188, "Vous voyez vos genoux sortir ? Ils plient trop depuis la hanche.", "middle", "dg-lbl mini"), "Jambes de brasse sur le dos"),
+  "br-bras-battements": () => svg(340, 210, `<rect x="0" y="0" width="340" height="140" class="dg-water"/>` + T(6, 16, "vu du dessus", "start", "dg-lbl mini") +
+    frogTop(160, 76, { arms: "pull", legs: "tendues" }) +
+    P("M290 66 Q292 36 244 38 Q222 44 226 70", "dg-path dash acc", 'marker-end="url(#ar)"') + P("M290 86 Q292 116 244 114 Q222 108 226 82", "dg-path dash acc", 'marker-end="url(#ar)"') +
+    [0, 1, 2].map(i => P(`M${14 + i * 8} 64 v24`, "dg-path acc")).join("") + T(30, 104, "battements", "middle", "dg-lbl mini") +
+    T(334, 30, "écarter, tirer jusqu'aux épaules…", "end", "dg-lbl mini") + T(334, 132, "…mains sous le menton, puis devant", "end", "dg-lbl mini") +
+    seqBoxes(150, [{ t: "tirer", s: "coudes hauts" }, { t: "inspirer", s: "tête monte" }, { t: "allonger", s: "tête replonge" }, { t: "1 s devant", s: "bras tendus", c: "dg-hard" }]) +
+    T(170, 204, "Les battements de crawl continuent pendant tout l'exercice.", "middle", "dg-lbl"), "Bras de brasse avec battements de crawl"),
+  "br-coordination": () => svg(340, 220, `<rect x="0" y="0" width="340" height="220" class="dg-bg"/>` +
+    seqBoxes(20, [{ t: "1 tirer", s: "bras" }, { t: "2 respirer", s: "tête sort" }, { t: "3 pousser", s: "jambes" }, { t: "4 glisser", s: "« 1, 2 »", c: "dg-hard" }]) +
+    P("M309 58 Q309 84 170 84 Q31 84 31 60", "dg-path dash acc", 'marker-end="url(#ar)"') + T(170, 98, "on recommence", "middle", "dg-lbl mini") +
+    water(340, 220, 118) + frogAt(96, 162, 0.6, { arms: "pull", legs: "tendues" }) + T(88, 208, "bras tirent, jambes tendues", "middle", "dg-lbl mini") +
+    frogAt(258, 162, 0.6, { arms: "front", legs: "repli" }) + T(252, 208, "bras devant, puis jambes", "middle", "dg-lbl mini"), "Coordination de la brasse"),
+  "br-2j1b": () => svg(340, 200, `<rect x="0" y="0" width="340" height="200" class="dg-bg"/>` +
+    seqBoxes(30, [{ t: "complet", s: "+ respiration" }, { t: "jambes", s: "en flèche" }, { t: "glisse", s: "1-2 s", c: "dg-hard" }, { t: "complet", s: "+ respiration" }], 74, 8) +
+    T(170, 20, "1 cycle = 1 bras + 2 jambes", "middle", "dg-lbl mini") +
+    water(340, 200, 84) + frogAt(178, 120, 0.7, { arms: "front", legs: "repli" }) + T(334, 104, "tête rentrée", "end", "dg-lbl mini") +
+    T(170, 172, "Le 2e coup de jambes se fait bras tendus devant,", "middle", "dg-lbl") + T(170, 190, "tête entre les bras, en soufflant dans l'eau.", "middle", "dg-lbl"), "2 coups de jambes pour 1 coup de bras"),
+  "br-glisse": () => svg(340, 200, `<rect x="0" y="0" width="340" height="200" class="dg-water"/>` + `<rect x="18" y="26" width="6" height="120" class="dg-wall"/><rect x="316" y="26" width="6" height="120" class="dg-wall"/>` +
+    T(170, 18, "25 m", "middle", "dg-lbl b") + L(30, 18, 120, 18, "dg-path") + L(220, 18, 310, 18, "dg-path") +
+    T(30, 52, "sans glisse : 16 mouvements", "start", "dg-lbl mini") + [...Array(16)].map((_, i) => C(36 + i * 17.5, 64, 5, "dg-hard")).join("") +
+    T(30, 100, "avec glisse : 11 mouvements", "start", "dg-lbl mini") + [...Array(11)].map((_, i) => C(36 + i * 26, 112, 5, "dg-easydot") + (i < 10 ? L(43 + i * 26, 112, 55 + i * 26, 112, "dg-path acc") : "")).join("") +
+    T(170, 140, "trait = 2 s en flèche après chaque poussée", "middle", "dg-lbl mini") +
+    T(170, 170, "Comptez vos mouvements par 25 m", "middle", "dg-lbl") + T(170, 188, "et enlevez-en 1 ou 2 à chaque série.", "middle", "dg-lbl"), "Glisse longue en brasse"),
+  "br-virage": () => svg(340, 200, `<rect x="0" y="0" width="340" height="200" class="dg-water"/>` +
+    [0, 1, 2, 3].map(i => `<rect x="${78 + i * 85}" y="22" width="6" height="110" class="dg-wall"/>`).join("") +
+    L(18, 72, 56, 72, "dg-torso") + C(64, 70, 8) + L(62, 64, 78, 58) + L(62, 76, 78, 82, "dg-limb back") + T(42, 150, "1 toucher", "middle", "dg-lbl b") + T(42, 163, "2 mains", "middle", "dg-lbl mini") +
+    C(140, 66, 8) + P("M132 72 q-14 10 -2 22 q12 6 20 -6", "dg-limb") + L(148, 66, 162, 58) + L(134, 74, 116, 96, "dg-limb back") + T(127, 150, "2 genoux,", "middle", "dg-lbl b") + T(127, 163, "1 main sous l'eau", "middle", "dg-lbl mini") +
+    C(196, 86, 8) + L(204, 88, 230, 88, "dg-torso") + P("M230 88 l10 -8 l8 8", "dg-limb") + L(188, 86, 176, 86) + AR("M226 110 h-46", "dg-path acc") + T(212, 150, "3 pousser", "middle", "dg-lbl b") + T(212, 163, "sur le côté", "middle", "dg-lbl mini") +
+    L(262, 92, 316, 92, "dg-torso") + C(276, 92, 7) + L(268, 92, 254, 92) + AR("M300 112 h-46", "dg-path acc") + bubbles(282, 80) + T(297, 150, "4 flèche", "middle", "dg-lbl b") + T(297, 163, "1 bras, 1 jambes", "middle", "dg-lbl mini") +
+    T(170, 188, "Toucher à 2 mains, tourner, pousser, glisser, repartir.", "middle", "dg-lbl"), "Virage brasse")
+});
 
 /* ---------- Schémas vélo ---------- */
 function bikeFrame(x, y, s = 1) { // vélo vu de côté, roue arrière centrée en (x,y)
