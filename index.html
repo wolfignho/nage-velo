@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nage &amp; Vélo Cardio</title>
+<meta name="description" content="Cardio en natation et à vélo : séances, plan 12 semaines, minuteur et suivi.">
+<meta name="theme-color" content="#0b1e33">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nage & Vélo">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/favicon-64.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><img src="icons/icon-192.png" alt=""><span>Nage &amp; Vélo <b>Cardio</b></span></div>
+  <button class="lvl-chip" data-act="tab" data-tab="profil" id="lvlChip" aria-label="Niveau"></button>
+</header>
+<main id="view"></main>
+<nav class="tabs" id="tabs">
+  <button data-act="tab" data-tab="home"><span>🏠</span>Accueil</button>
+  <button data-act="tab" data-tab="plan"><span>📅</span>Plan</button>
+  <button data-act="tab" data-tab="lib"><span>📚</span>Séances</button>
+  <button data-act="tab" data-tab="suivi"><span>📈</span>Suivi</button>
+  <button data-act="tab" data-tab="profil"><span>🏅</span>Profil</button>
+</nav>
+<div id="sheet" class="sheet hidden" role="dialog" aria-modal="true"><div class="sheet-bg" data-act="close"></div><div class="sheet-card" id="sheetCard"></div></div>
+<div id="player" class="player hidden"></div>
+<div id="toast" class="toast hidden"></div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
